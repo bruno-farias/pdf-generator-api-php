@@ -7,6 +7,7 @@ namespace PdfGeneratorApi;
 use Firebase\JWT\JWT;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
+use PdfGeneratorApi\Models\ClientValidationException;
 use PdfGeneratorApi\Models\PdfGeneratorApiException;
 use PdfGeneratorApi\Models\Templates;
 
@@ -60,11 +61,39 @@ class PdfGeneratorApiClient implements ClientInterface
     public function getTemplates(): Templates
     {
         try {
-            $response = $this->getClient()->get(self::BASE_URL . '/templates');
+            $response = $this->getClient()->get(self::BASE_URL . "/templates");
             $data = json_decode($response->getBody(), true);
             return new Templates($data['response']);
         } catch (ClientException $clientException) {
             throw new PdfGeneratorApiException($clientException->getMessage(), $clientException->getCode());
+        }
+    }
+
+    public function mergeTemplate(int $templateId, string $name, string $format = 'pdf', string $output = 'base64')
+    {
+        try {
+            $this->validateFormat($format);
+            $this->validateOutput($output);
+            $uri = self::BASE_URL . "/templates/output/?name={$name}&format={$format}&output={$output}";
+            $response = $this->getClient()->post($uri, [
+                'json' => []
+            ]);
+        } catch (ClientException $clientException) {
+            throw new PdfGeneratorApiException($clientException->getMessage(), $clientException->getCode());
+        }
+    }
+
+    private function validateFormat(string $format): void
+    {
+        if (!in_array($format, self::VALID_FORMATS)) {
+            throw new ClientValidationException("Invalid format");
+        }
+    }
+
+    private function validateOutput(string $output): void
+    {
+        if (!in_array($output, self::VALID_OUTPUTS)) {
+            throw new ClientValidationException("Invalid output");
         }
     }
 }

@@ -15,12 +15,13 @@ class AuthenticationTest extends TestCase
 
     public function testCreatesValidToken()
     {
-        $key = $this->generateRandomHash();
-        $secret = $this->generateRandomHash();
-        $workspace = $this-> generateCompanyEmail();
+        $key = 'ad54aaff89ffdfeff178bb8a8f359b29fcb20edb56250b9f584aa2cb0162ed4a';
+        $secret = 'c00c18db6be22a6ffb5386f8503eecf98165a68410539e4693a08d7d995f5f47';
+        $workspace = 'demo.example@actualreports.com';
         $client = new PdfGeneratorApiClient($key, $secret, $workspace);
 
         $token = $client->createToken();
+        $this->dd($token);
         $decodedToken = JWT::decode($token, $secret, ['HS256']);
 
         $this->assertEquals($workspace, $decodedToken->sub);
