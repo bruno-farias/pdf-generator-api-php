@@ -9,7 +9,7 @@ use Faker\Generator;
 
 trait TestHelper
 {
-    public function dd($variable)
+    public function dd($variable): void
     {
         echo "";
         var_dump($variable);
