@@ -9,6 +9,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use PdfGeneratorApi\Models\PdfGeneratorApiClientValidationException;
 use PdfGeneratorApi\Models\PdfGeneratorApiException;
+use PdfGeneratorApi\Models\TemplateMergeResponse;
 use PdfGeneratorApi\Models\Templates;
 
 class PdfGeneratorApiClient implements ClientInterface
@@ -59,23 +60,28 @@ class PdfGeneratorApiClient implements ClientInterface
     {
         try {
             $response = $this->getClient()->get(self::BASE_URL . "/templates");
-            $data = json_decode($response->getBody(), true);
+            $data = $this->convertResponseToArray($response);
             return new Templates($data['response']);
         } catch (ClientException $clientException) {
             throw new PdfGeneratorApiException($clientException->getMessage(), $clientException->getCode());
         }
     }
 
-    public function mergeTemplate(int $templateId, string $name, string $format = 'pdf', string $output = 'base64')
-    {
+    public function mergeTemplate(
+        int $templateId,
+        string $name,
+        string $data = '',
+        string $format = 'pdf',
+        string $output = 'base64'
+    ): TemplateMergeResponse {
         try {
             $this->validateFormat($format);
             $this->validateOutput($output);
             $uri = self::BASE_URL . "/templates/$templateId/output/?name=$name&format=$format&output=$output";
             $response = $this->getClient()->post($uri, [
-                'json' => []
+                'json' => $data
             ]);
-            return json_decode($response->getBody(), true);
+            return new TemplateMergeResponse($this->convertResponseToArray($response));
         } catch (ClientException $clientException) {
             throw new PdfGeneratorApiException($clientException->getMessage(), $clientException->getCode());
         }
@@ -93,5 +99,10 @@ class PdfGeneratorApiClient implements ClientInterface
         if (!in_array($output, self::VALID_OUTPUTS)) {
             throw new PdfGeneratorApiClientValidationException('Invalid output');
         }
+    }
+
+    private function convertResponseToArray($response): array
+    {
+        return json_decode($response->getBody(), true);
     }
 }

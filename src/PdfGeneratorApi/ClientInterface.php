@@ -5,6 +5,7 @@ namespace PdfGeneratorApi;
 
 
 use GuzzleHttp\Client;
+use PdfGeneratorApi\Models\TemplateMergeResponse;
 use PdfGeneratorApi\Models\Templates;
 
 interface ClientInterface
@@ -20,7 +21,13 @@ interface ClientInterface
 
     public function getTemplates(): Templates;
 
-    public function mergeTemplate(int $templateId, string $name, string $format = 'pdf', string $output = 'base64');
+    public function mergeTemplate(
+        int $templateId,
+        string $name,
+        string $data = '',
+        string $format = 'pdf',
+        string $output = 'base64'
+    ): TemplateMergeResponse;
 
     public function validateFormat(string $format): void;
 

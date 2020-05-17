@@ -1,11 +1,16 @@
 <?php
 
 
-namespace Tests;
+namespace tests;
 
 
 use Faker\Factory;
 use Faker\Generator;
+use GuzzleHttp\Client;
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Psr7\Response;
+use PdfGeneratorApi\Models\Template;
 
 trait TestHelper
 {
@@ -35,6 +40,21 @@ trait TestHelper
             'modified' => $this->generateDateTime(),
             'owner' => $this->randomBool(),
             'tags' => $this->generateTags()
+        ];
+    }
+
+    public function generateTemplateMergeResponse(): array
+    {
+        $name = $this->generateName();
+        $format = $this->getValidFormats();
+        return [
+            'response' => $this->generateBase64(),
+            'meta' => [
+                'name' => "$name.pdf",
+                'display_name' => $name,
+                'encoding' => 'base64',
+                'content-type' => $this->getContentType($format)
+            ]
         ];
     }
 
@@ -103,5 +123,23 @@ trait TestHelper
     public function generateBase64()
     {
         return base64_encode($this->generateRandomHash());
+    }
+
+    public function validateTemplateContent(array $source, Template $template)
+    {
+        $this->assertEquals($source['id'], $template->getId());
+        $this->assertEquals($source['name'], $template->getName());
+        $this->assertEquals($source['modified'], $template->getModified());
+        $this->assertEquals($source['owner'], $template->getOwner());
+        $this->assertEquals($source['tags'], $template->getTags());
+    }
+
+    private function mockResponse(int $status, array $response): Client
+    {
+        $mock = new MockHandler([
+            new Response($status, ['Content-Type' => 'application/json'], json_encode($response))
+        ]);
+        $handlerStack = HandlerStack::create($mock);
+        return new Client(['handler' => $handlerStack]);
     }
 }
