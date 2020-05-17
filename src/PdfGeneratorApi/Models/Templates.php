@@ -4,8 +4,12 @@
 namespace PdfGeneratorApi\Models;
 
 
+use PdfGeneratorApi\ArrayOrJson;
+
 class Templates
 {
+    use ArrayOrJson;
+
     private $templates;
 
     public function __construct(array $items)

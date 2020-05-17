@@ -4,8 +4,12 @@
 namespace PdfGeneratorApi\Models;
 
 
+use PdfGeneratorApi\ArrayOrJson;
+
 class TemplateMergeResponse
 {
+    use ArrayOrJson;
+
     private $response;
     private $name;
     private $displayName;
