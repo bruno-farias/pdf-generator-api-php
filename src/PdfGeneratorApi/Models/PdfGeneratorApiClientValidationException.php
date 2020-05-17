@@ -6,7 +6,7 @@ namespace PdfGeneratorApi\Models;
 
 use Throwable;
 
-class ClientValidationException extends \Exception
+class PdfGeneratorApiClientValidationException extends \Exception
 {
     public function __construct($message = "", $code = 0, Throwable $previous = null)
     {

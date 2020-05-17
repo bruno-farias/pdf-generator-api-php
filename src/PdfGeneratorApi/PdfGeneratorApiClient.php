@@ -7,21 +7,18 @@ namespace PdfGeneratorApi;
 use Firebase\JWT\JWT;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
-use PdfGeneratorApi\Models\ClientValidationException;
+use PdfGeneratorApi\Models\PdfGeneratorApiClientValidationException;
 use PdfGeneratorApi\Models\PdfGeneratorApiException;
 use PdfGeneratorApi\Models\Templates;
 
 class PdfGeneratorApiClient implements ClientInterface
 {
-    const BASE_URL = 'https://us1.pdfgeneratorapi.com/api/v3';
-
-    /** @var Client $client */
-    protected $client;
-    protected $key;
-    protected $secret;
-    protected $workspace;
-
-    const ALG = 'HS256';
+    private $client;
+    private $key;
+    private $secret;
+    private $workspace;
+    private const ALG = 'HS256';
+    private const BASE_URL = 'https://us1.pdfgeneratorapi.com/api/v3';
 
     public function __construct(string $key, string $secret, string $workspace)
     {
@@ -46,7 +43,7 @@ class PdfGeneratorApiClient implements ClientInterface
             $token = $this->createToken();
             $this->client = new Client([
                 'headers' => [
-                    'Authorization' => "Bearer {$token}"
+                    'Authorization' => "Bearer $token"
                 ]
             ]);
         }
@@ -74,26 +71,27 @@ class PdfGeneratorApiClient implements ClientInterface
         try {
             $this->validateFormat($format);
             $this->validateOutput($output);
-            $uri = self::BASE_URL . "/templates/output/?name={$name}&format={$format}&output={$output}";
+            $uri = self::BASE_URL . "/templates/$templateId/output/?name=$name&format=$format&output=$output";
             $response = $this->getClient()->post($uri, [
                 'json' => []
             ]);
+            return json_decode($response->getBody(), true);
         } catch (ClientException $clientException) {
             throw new PdfGeneratorApiException($clientException->getMessage(), $clientException->getCode());
         }
     }
 
-    private function validateFormat(string $format): void
+    public function validateFormat(string $format): void
     {
         if (!in_array($format, self::VALID_FORMATS)) {
-            throw new ClientValidationException("Invalid format");
+            throw new PdfGeneratorApiClientValidationException('Invalid format');
         }
     }
 
-    private function validateOutput(string $output): void
+    public function validateOutput(string $output): void
     {
         if (!in_array($output, self::VALID_OUTPUTS)) {
-            throw new ClientValidationException("Invalid output");
+            throw new PdfGeneratorApiClientValidationException('Invalid output');
         }
     }
 }

@@ -22,4 +22,7 @@ interface ClientInterface
 
     public function mergeTemplate(int $templateId, string $name, string $format = 'pdf', string $output = 'base64');
 
+    public function validateFormat(string $format): void;
+
+    public function validateOutput(string $output): void;
 }

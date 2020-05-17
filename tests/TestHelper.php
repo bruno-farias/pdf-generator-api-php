@@ -38,32 +38,32 @@ trait TestHelper
         ];
     }
 
-    private function faker(): Generator
+    public function faker(): Generator
     {
         return Factory::create();
     }
 
-    private function generateId(): int
+    public function generateId(int $min = 10000, int $max = 99999): int
     {
-        return $this->faker()->numberBetween(10000, 99999);
+        return $this->faker()->numberBetween($min, $max);
     }
 
-    private function generateName(): string
+    public function generateName(): string
     {
         return $this->faker()->name;
     }
 
-    private function generateDateTime()
+    public function generateDateTime()
     {
         return $this->faker()->dateTimeBetween('-3 years')->format('Y-m-d H:m:s');
     }
 
-    private function randomBool(): bool
+    public function randomBool(): bool
     {
         return $this->faker()->boolean;
     }
 
-    private function generateTags(): array
+    public function generateTags(): array
     {
         $options = [
             $this->generateName(),
@@ -72,5 +72,36 @@ trait TestHelper
         ];
         $count = $this->faker()->numberBetween(0, 3);
         return $this->faker()->randomElements($options, $count);
+    }
+
+    public function getValidFormats(): string
+    {
+        return $this->faker()->randomElement(['pdf', 'html', 'zip', 'xlsx']);
+    }
+
+    public function getContentType(string $format)
+    {
+        switch ($format) {
+            case 'pdf':
+                return 'application/pdf';
+            case 'html':
+                return 'text/html';
+            case 'zip':
+                return 'application/zip';
+            case 'xlsx':
+                return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+            default:
+                return new \Exception('MIME Type not available!');
+        }
+    }
+
+    public function getValidOutputs()
+    {
+        return $this->faker()->randomElement(['base64', 'url', 'I']);
+    }
+
+    public function generateBase64()
+    {
+        return base64_encode($this->generateRandomHash());
     }
 }
